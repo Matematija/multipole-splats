@@ -1,11 +1,16 @@
+from typing import TYPE_CHECKING
+
 import equinox as eqx
 import jax
 from jax import Array
 from jax import numpy as jnp
 from jaxtyping import Float, Scalar
 
-from ..xc import XCFunctional
 from .integrals import Integrals
+
+if TYPE_CHECKING:
+    from ..xc.base import XCFunctional
+    # Avoid circular imports
 
 
 def hartree_energy(
@@ -44,7 +49,7 @@ def K_matrix(cderi: Float[Array, "naux nao nao"], dm: Float[Array, "*spin nao na
 
 class EnergyFunctional(eqx.Module):
     ints: Integrals
-    xc: XCFunctional
+    xc: "XCFunctional"
 
     def __call__(self, dm: Float[Array, "*spin nao nao"], *args, **kwargs) -> Scalar:
 
