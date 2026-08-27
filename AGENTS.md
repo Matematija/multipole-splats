@@ -153,6 +153,11 @@ are in Bohr; energies are in Hartree unless an interface explicitly states other
 
 ## Validation and change discipline
 
+Before creating a virtual environment, inspect the repository root and its parent directory for an
+existing compatible environment (commonly `.venv/` or `venv/`) and reuse it. If none exists, create
+one with a Python version satisfying `pyproject.toml`, then install the project and development extras
+from that file.
+
 Standard checks from the repository root are:
 
 ```bash
