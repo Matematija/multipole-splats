@@ -13,7 +13,7 @@ This is research code. The API and numerical methods may evolve as the research 
 
 If you are confused by the name, it comes from the computer vision community. **Gaussian splatting** is a state-of-the-art method for 3D scene reconstruction from images. The matter density is represented as a large cloud of anisotropic Gaussian blobs.
 
-<iframe width="560" height="315" align="center" src="https://www.youtube.com/embed/mD0oBE9LJTQ?si=OK2PW1-m7y7dVnzo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+![image](images/bicycle.webp)
 
 If Gaussians are expressive and stable enough to render detail like [this](https://www.youtube.com/embed/mD0oBE9LJTQ?si=OK2PW1-m7y7dVnzo), why not use them to represent local *electronic* densities?
 
