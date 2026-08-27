@@ -1,6 +1,6 @@
 # <h1 align='center'>Multipole Splats</h1>
 
-`multipole-splats` is a research library for inverse Kohn--Sham (IKS) and optimized effective potential (OEP) calculations. It represents a local potential by finite-width Gaussian monopoles and dipoles, projects that potential into a molecular atomic-orbital basis, and differentiates the resulting eigensystem and energy with JAX. PySCF provides molecular integrals, quadrature, and LibXC functionals.
+`multipole-splats` is a research library for inverse Kohn-Sham (IKS) and optimized effective potential (OEP) calculations. It represents a local potential by finite-width Gaussian monopoles and dipoles, projects that potential into a molecular atomic-orbital basis, and differentiates the resulting eigensystem and energy with JAX. PySCF provides molecular integrals, quadrature, and LibXC functionals.
 
 * Code author: **Matija Medvidović** (ETH Zürich)
 * Preprint: **[TBA]**
@@ -11,21 +11,22 @@ This is research code. The API and numerical methods may evolve as the research 
 
 ## ...Splats?
 
-**[PLACEHOLDER]**
+If you are confused by the name, it comes from the computer vision community. **Gaussian splatting** is a state-of-the-art method for 3D scene reconstruction from images. The matter density is represented as a large cloud of anisotropic Gaussian blobs.
+
+<iframe width="560" height="315" align="center" src="https://www.youtube.com/embed/mD0oBE9LJTQ?si=OK2PW1-m7y7dVnzo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+If Gaussians are expressive and stable enough to render detail like [this](https://www.youtube.com/embed/mD0oBE9LJTQ?si=OK2PW1-m7y7dVnzo), why not use them to represent local *electronic* densities?
 
 ## Code example
 
-The following closed-shell water calculation minimizes the exact-exchange energy over local
-potentials. Install the package in a Python 3.10-or-newer environment first. Optax is an
-example-only optimizer and is therefore installed separately:
+The following closed-shell water calculation minimizes the exact-exchange energy over local potentials. Install the package in a Python 3.10-or-newer environment first. Optax is needed for first-order optimization and should be installed separately.
 
 ```bash
 python -m pip install .
 python -m pip install optax
 ```
 
-Enable JAX double precision before constructing any arrays, then build a small PySCF reference
-calculation. PySCF converts the input geometry to Bohr internally.
+Enable JAX double precision before constructing any arrays, then build a small PySCF reference calculation. PySCF converts the input geometry to Bohr internally.
 
 ```python
 import jax
@@ -48,8 +49,7 @@ mf = scf.RHF(mol).run()
 dm_ref = jnp.asarray(mf.make_rdm1())
 ```
 
-Assemble the AO data, quadrature, exact-exchange energy, and OEP loss. The reference density fixes
-the FA background and electron count; it is not the density being optimized.
+Assemble the AO data, quadrature, exact-exchange energy, and OEP loss. The reference density fixes the FA background and electron count; it is not the density being optimized.
 
 ```python
 from msplats import AtomicOrbitals, EnergyFunctional, EnergyLoss, Integrals
@@ -64,9 +64,7 @@ energy = EnergyFunctional(ints, ExactExchange(ints.cderi))
 loss = EnergyLoss(ao, energy, grid, dm_ref)
 ```
 
-Initialize the variational correction. Exact exchange has $\gamma=1$, so the constrained excess
-monopole charge is zero. `MultipolePotential` contains only $v_{\mathrm{MS}}$; `EnergyLoss` adds the
-fixed nuclear and FA terms when it constructs the one-electron problem.
+Initialize the variational correction. Exact exchange has $\gamma=1$, so the constrained excess monopole charge is zero. `MultipolePotential` contains only $v_{\mathrm{MS}}$. `EnergyLoss` adds the fixed nuclear and FA terms when it constructs the one-electron problem.
 
 ```python
 from msplats import MultipolePotential
@@ -87,8 +85,7 @@ potential = MultipolePotential(
 )
 ```
 
-Finally, follow the manuscript's use of Adamax with a compact 500-step, fixed-learning-rate example.
-Equinox differentiates the array leaves of the potential and leaves its static data untouched.
+Finally, follow the manuscript's use of Adamax with a compact 500-step, fixed-learning-rate example. Equinox differentiates the array leaves of the potential and leaves its static data untouched.
 
 ```python
 import equinox as eqx
@@ -141,10 +138,10 @@ $$
 v_\mathrm{OEP} = \underset{v}{\textrm{arg\,min}} \, E[\phi[v]] \; ,
 $$
 
-while the *inverse Kohn--Sham* (IKS) formalism matches the potential against a target *external* density $n_0$ by minimizing density divergence $\mathcal{D}$,
+while the *inverse Kohn-Sham* (IKS) formalism matches the potential against a target *external* density $n_0$ by minimizing density divergence $\mathcal{D}$,
 
 $$
 v_\mathrm{IKS} = \underset{v}{\textrm{arg\,min}} \, \mathcal{D} (n[v], n_0) \; .
 $$
 
-In either case, we do not require the Kohn--Sham response inversion. The optimization is stable and convergent.
+In either case, we do not require the Kohn-Sham response inversion. The optimization is stable and convergent.
