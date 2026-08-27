@@ -13,6 +13,14 @@ from ..grid import Grid
 
 
 class XCFunctional(eqx.Module):
+    """Abstract exchange-correlation energy functional over an AO density matrix.
+
+    Concrete functionals expose a human-readable ``name`` and a LibXC-style
+    ``xc_type`` and return a scalar energy in Hartree. Restricted inputs are
+    spin-summed arrays of shape ``(nao, nao)``; unrestricted inputs have shape
+    ``(2, nao, nao)`` with spin first.
+    """
+
     name: eqx.AbstractVar[str]
     xc_type: eqx.AbstractVar[str]
 
@@ -90,6 +98,20 @@ def _eval_ao_data(xc_type, ao, grid):
 
 
 class LocalFunctional(XCFunctional):
+    """Integrate a local LibXC-compatible energy density on a molecular grid.
+
+    Args:
+        functional: Pointwise LDA, GGA, or meta-GGA energy-density model.
+        ao: Atomic-orbital evaluator matching the density-matrix basis.
+        grid: Molecular quadrature grid in Bohr with volume weights.
+        cache_ao: Materialize AO values and any required derivatives on the full grid.
+            Disable this to recompute them on each call and reduce persistent memory.
+
+    Calling the instance with a restricted or unrestricted AO density matrix returns
+    the grid-integrated exchange-correlation energy in Hartree. The spin convention of
+    the density matrix must match that used to construct ``functional``.
+    """
+
     functional: XCEnergyDensity
     ao: AtomicOrbitals
     grid: Grid
@@ -140,6 +162,17 @@ class LocalFunctional(XCFunctional):
 
 
 class LocalPotential(eqx.Module):
+    """Evaluate the functional derivative of a local energy density.
+
+    Args:
+        functional: Pointwise LDA or GGA energy-density model.
+        density: Callable scalar density ``n(r)`` at coordinates in Bohr.
+
+    Calling the instance returns the corresponding multiplicative XC potential at one
+    point. LDA and first-gradient GGA forms are supported; higher derivative orders are
+    rejected explicitly.
+    """
+
     functional: XCEnergyDensity
     density: Callable[[Float[Array, "3"]], Scalar]
 

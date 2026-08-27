@@ -190,7 +190,12 @@ class _OrbitalProblem(eqx.Module):
 
 
 class AbstractLoss(eqx.Module):
-    """Scalar objective over a variational multipole potential."""
+    """Abstract scalar objective over a variational multipole potential.
+
+    Concrete losses are Equinox modules whose only call argument is a
+    :class:`MultipolePotential`. The result is a scalar to minimize and can be
+    differentiated with ``eqx.filter_value_and_grad``.
+    """
 
     @abstractmethod
     def __call__(self, potential: MultipolePotential) -> Scalar:
@@ -202,7 +207,28 @@ class _OrbitalLoss(AbstractLoss):
 
 
 class EnergyLoss(_OrbitalLoss):
-    """Generalized Kohn--Sham energy induced by a local multipole potential."""
+    """Generalized Kohn--Sham energy induced by a local multipole potential.
+
+    Args:
+        orb_basis: Atomic-orbital evaluator for the molecular AO basis.
+        energy: Orbital-dependent energy functional to minimize.
+        grid: Quadrature used to project the variational potential into the AO basis.
+        dm_ref: Reference AO density matrix used to construct the fixed Fermi--Amaldi
+            background and determine the electron count.
+        mo_occ: Orbital occupations. Closed-shell restricted occupations are inferred
+            when omitted; unrestricted and open-shell calculations must provide them.
+        cache_grid_data: Materialize all AO values and the reference density on the
+            grid. If ``False``, evaluate AO data lazily in chunks.
+        chunk_size: Number of grid points processed per chunk, or ``None`` for one
+            unchunked operation.
+        eigh_grad_eps: Degeneracy cutoff for derivatives of orbital eigenvectors.
+
+    The trial Hamiltonian contains the nuclear one-electron operator, a fixed
+    Fermi--Amaldi term built from ``dm_ref``, and the supplied ``v_MS``. Calling the
+    loss solves for its occupied orbitals and returns the full energy from ``energy``
+    in Hartree. All molecular objects must share geometry, AO basis, and spin
+    convention.
+    """
 
     energy: EnergyFunctional
 
@@ -279,7 +305,27 @@ def _wu_yang_aux_bwd(wrho_diff, cotangents, _, v_vals, ks_prob, mo_occ, grid_dat
 
 
 class WuYangLoss(_OrbitalLoss):
-    """Negative Wu--Yang functional for inverse Kohn--Sham optimization."""
+    """Negative Wu--Yang functional for inverse Kohn--Sham optimization.
+
+    Args:
+        orb_basis: Atomic-orbital evaluator for the molecular AO basis.
+        energy: Energy object supplying molecular integrals. Its XC functional is not
+            evaluated by the Wu--Yang objective.
+        grid: Quadrature used for potential projection and density comparison.
+        dm_ref: Target restricted or unrestricted AO density matrix.
+        mo_occ: Orbital occupations. Closed-shell restricted occupations are inferred
+            when omitted; unrestricted and open-shell calculations must provide them.
+        cache_grid_data: Materialize AO and reference-density values on the grid. If
+            ``False``, evaluate them lazily in chunks.
+        chunk_size: Number of grid points processed per chunk, or ``None`` for one
+            unchunked operation.
+        eigh_grad_eps: Degeneracy cutoff for derivatives of orbital eigenvectors.
+
+    Calling the loss returns ``-W[v_MS]`` so ordinary minimizers maximize the
+    Wu--Yang functional. Its custom reverse-mode rule uses the weighted density
+    residual directly and does not form or invert the Kohn--Sham response. The fixed
+    one-electron Hamiltonian includes the nuclear and Fermi--Amaldi terms.
+    """
 
     def __init__(
         self,
@@ -319,7 +365,17 @@ class WuYangLoss(_OrbitalLoss):
 
 
 class Regularized(AbstractLoss):
-    """Add force-matching regularization to an OEP or IKS loss."""
+    """Add force-matching regularization to an OEP or IKS loss.
+
+    Args:
+        loss: :class:`EnergyLoss` or :class:`WuYangLoss` to augment.
+        lambda_: Nonnegative regularization strength.
+
+    The returned objective is ``loss(v_MS) + lambda_ R[v_MS]``, with
+    ``R = (8 pi)^{-1} integral |grad v_MS(r)|^2 dr`` on the wrapped loss's grid.
+    This selects a smoother representative among nearly degenerate potentials; it is
+    not required for convergence and does not remove the physical response null space.
+    """
 
     loss: _OrbitalLoss
     lambda_: float = eqx.field(static=True)

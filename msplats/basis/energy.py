@@ -48,6 +48,18 @@ def K_matrix(cderi: Float[Array, "naux nao nao"], dm: Float[Array, "*spin nao na
 
 
 class EnergyFunctional(eqx.Module):
+    """Evaluate a generalized Kohn--Sham total energy from an AO density matrix.
+
+    Args:
+        ints: Molecular one- and two-electron integral data.
+        xc: Exchange-correlation functional contributing ``E_xc[dm]``.
+
+    The returned Hartree-valued scalar is ``E_nuc + Tr(dm h_1) + E_H[dm] +
+    E_xc[dm]``. A restricted density matrix has shape ``(nao, nao)`` and is
+    spin-summed; an unrestricted density matrix has shape ``(2, nao, nao)`` with
+    spin first. The supplied functional must use the same convention.
+    """
+
     ints: Integrals
     xc: "XCFunctional"
 

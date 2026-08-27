@@ -332,6 +332,28 @@ class DipoleCloudPotential(eqx.Module):
 
 
 class MultipolePotential(eqx.Module):
+    """Variational local potential represented by Gaussian monopole and dipole splats.
+
+    Args:
+        num_monopoles: Number of trainable Gaussian monopoles.
+        num_dipoles: Number of trainable Gaussian dipoles.
+        atom_coords: Nuclear coordinates in Bohr, with shape ``(n_atoms, 3)``.
+        atom_charges: Nuclear charges with shape ``(n_atoms,)``.
+        geometry_init: Initializer for splat positions and exponents.
+        excess_charge: Required sum of all monopole charges. For a neutral-system OEP
+            with exact-exchange fraction ``gamma``, use ``1 - gamma``.
+        exponent_bounds: Optional positive lower and upper bounds for Gaussian
+            exponents in inverse Bohr squared.
+        tube_scale: Scale of the smooth molecular-neighbourhood position constraint.
+        snap_scale: Scale controlling smooth assignment of splats to nearby atoms.
+        key: JAX PRNG key used by ``geometry_init``.
+
+    Calling the instance at ``r`` evaluates only the variational correction
+    ``v_MS(r)``. Nuclear and Fermi--Amaldi background terms are not included. Monopole
+    charges satisfy ``sum(q) == excess_charge`` for every parameter value; positions
+    and exponents are constrained through smooth views of unconstrained parameters.
+    """
+
     monopole: MonopoleCloudPotential
     dipole: DipoleCloudPotential
 
@@ -575,6 +597,20 @@ def dipole_potential_matrix(
 
 
 class MultipolePotentialMatrix(eqx.Module):
+    """Project a multipole-splat potential analytically into a molecular AO basis.
+
+    Args:
+        mol: PySCF molecule defining the target AO basis. Auxiliary centers and
+            exponents are interpreted in atomic units.
+        chunk_size: Number of splats processed per callback. Use ``None`` to project
+            all splats at once.
+
+    Calling the instance returns the matrix with elements
+    ``integral chi_m(r) v_MS(r) chi_n(r) dr``. Three-center Coulomb integrals are
+    evaluated in a Cartesian auxiliary representation and transformed back when the
+    molecular AO basis is spherical.
+    """
+
     _mol_cart: gto.Mole = eqx.field(static=True)
     _c2s_coeff: Float[Array, "nao_cart nao"] | None
     _chunk_size: int | None

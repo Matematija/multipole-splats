@@ -147,6 +147,20 @@ def _deriv_order(xc_type) -> int:
 
 
 class LibXCEnergyDensity(XCEnergyDensity):
+    """Differentiable pointwise energy density backed by PySCF LibXC.
+
+    Args:
+        xc_code: Any functional name or LibXC expression accepted by PySCF.
+        spin: If ``True``, inputs carry a final two-component spin axis. If ``False``,
+            inputs are spin-summed.
+
+    The callable arguments depend on the functional family: density for LDA; density
+    and its Cartesian gradient for GGA; and additionally kinetic-energy density for
+    meta-GGA. The result is energy per volume, ``n epsilon_xc``, in atomic units.
+    LibXC executes through a host callback, with custom JAX derivatives supplied up to
+    the orders requested by the surrounding calculation.
+    """
+
     xc_code: str = eqx.field(static=True)
     xc_type: str = eqx.field(static=True)
     spin: bool = eqx.field(static=True)

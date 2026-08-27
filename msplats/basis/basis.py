@@ -75,6 +75,18 @@ def _(mol, primals, tangents):
 
 
 class AtomicOrbitals(eqx.Module):
+    """Evaluate a PySCF atomic-orbital basis at real-space coordinates.
+
+    Args:
+        mol: Built PySCF molecule defining the AO basis. Coordinates passed to the
+            instance are interpreted in Bohr, irrespective of the input unit used to
+            construct ``mol``.
+
+    Calling an instance with one point of shape ``(3,)`` returns the ``nao`` basis
+    values at that point. The evaluation is differentiable with respect to the point;
+    PySCF supplies the AO derivatives through a host callback.
+    """
+
     mol: gto.Mole = eqx.field(static=True)
 
     def __call__(self, r: Float[Array, "3"]) -> Float[Array, " nao"]:
