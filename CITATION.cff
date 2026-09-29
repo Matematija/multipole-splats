@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: multipole-splats
+message: >-
+  Research code for computing inverse and optimized
+  effective potentials in density functional theory.
+type: software
+authors:
+  - given-names: Matija
+    family-names: Medvidović
+    email: matija.medvidovic@gmail.com
+    affiliation: ETH Zurich
+    orcid: 'https://orcid.org/0000-0001-6770-0341'
+identifiers:
+  - type: url
+    value: 'https://arxiv.org/abs/2609.09280'
+    description: ArXiv preprint
+  - type: doi
+    value: 10.5281/zenodo.23021835
+    description: Zenodo
+repository-code: 'https://github.com/Matematija/multipole-splats'
+keywords:
+  - quantum
+  - electron
+  - gaussian
+  - dft
+license: Apache-2.0
