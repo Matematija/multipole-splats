@@ -14,12 +14,17 @@ authors:
     affiliation: ETH Zurich
     orcid: 'https://orcid.org/0000-0001-6770-0341'
 identifiers:
-  - type: url
-    value: 'https://arxiv.org/abs/2609.09280'
-    description: ArXiv preprint
   - type: doi
     value: 10.5281/zenodo.23021835
-    description: Zenodo
+    description: Zenodo software release v0.1.0-beta
+  - type: doi
+    value: 10.48550/arXiv.2609.09280
+    description: ArXiv preprint
+  - type: doi
+    value: 10.5281/zenodo.23040845
+    description: >-
+      Zenodo data and code archive for the preprint (inputs, results, figures; bundles
+      release v0.1.0-beta)
 repository-code: 'https://github.com/Matematija/multipole-splats'
 keywords:
   - quantum
@@ -27,3 +32,16 @@ keywords:
   - gaussian
   - dft
 license: Apache-2.0
+preferred-citation:
+  type: article
+  title: Multipole splats for optimized and inverted effective potentials
+  authors:
+    - given-names: Matija
+      family-names: Medvidović
+    - given-names: Angel
+      family-names: Rubio
+    - given-names: Juan
+      family-names: Carrasquilla
+  year: 2026
+  doi: 10.48550/arXiv.2609.09280
+  url: 'https://arxiv.org/abs/2609.09280'

@@ -1,4 +1,5 @@
 # <h1 align='center'>Multipole Splats</h1>
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23021834.svg)](https://doi.org/10.5281/zenodo.23021834)
 
 `multipole-splats` is a research library for inverse Kohn-Sham (IKS) and optimized effective potential (OEP) calculations. It represents a local potential by finite-width Gaussian monopoles and dipoles, projects that potential into a molecular atomic-orbital basis, and differentiates the resulting eigensystem and energy with JAX. PySCF provides molecular integrals, quadrature, and LibXC functionals.
 
